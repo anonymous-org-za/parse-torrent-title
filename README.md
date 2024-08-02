@@ -1,14 +1,12 @@
 # parse-torrent-title
 
-![Continuous integration](https://github.com/clement-escolano/parse-torrent-title/workflows/Continuous%20integration/badge.svg)
-
-This package helps you extract information from a torrent name such as language, resolution and codec.
+This package helps you extract information from a torrent name such as language, resolution and codec. This was forked and updated from [TheBeastLT's Fork](https://github.com/TheBeastLT/parse-torrent-title) of [parse-torrent-title](https://github.com/TheBeastLT/parse-torrent-title). While the fork is quite good, there are many instances where it has failed, so we decided to modify it ourselves. Most new regexes come from [dreulavelle's PTT](https://github.com/dreulavelle/PTT), which is a rewrite of parse-torrent-title in Python. 
 
 ## Installation
 
 You can install it using npm:
 ```bash
-npm install parse-torrent-title
+npm install https://github.com/TorBox-App/parse-torrent-title.git
 ```
 You should use Node 8.0 or higher to use this package.
 
@@ -16,7 +14,7 @@ You should use Node 8.0 or higher to use this package.
 
 A simple usage is as follows:
 ```javascript
-const ptt = require("parse-torrent-title");
+import ptt from "parse-torrent-title";
 const information = ptt.parse("Game.of.Thrones.S01E01.720p.HDTV.x264-CTU");
 
 console.log(information.title);      // Game of Thrones
