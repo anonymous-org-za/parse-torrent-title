@@ -12,20 +12,20 @@ const NON_ENGLISH_CHARS = (
     "\u0c80-\u0cff" + // Kannada characters
     "\u0d00-\u0d7f" + // Malayalam characters
     "\u0e00-\u0e7f"   // Thai characters
-);
-
-const CURLY_BRACKETS = ["{", "}"];
-const SQUARE_BRACKETS = ["[", "]"];
-const PARENTHESES = ["(", ")"];
-const BRACKETS = [CURLY_BRACKETS, SQUARE_BRACKETS, PARENTHESES];
-
-const RUSSIAN_CAST_REGEX = new RegExp(`\\([^)]*[\\u0400-\\u04ff][^)]*\\)$|(?<=\\/.*)\\(.*\\)$`, 'u');
-const ALT_TITLES_REGEX = new RegExp(`[^/|(]*[${NON_ENGLISH_CHARS}][^/|]*[/|]|[/|][^/|(]*[${NON_ENGLISH_CHARS}][^/|]*`, 'u');
-const NOT_ONLY_NON_ENGLISH_REGEX = new RegExp(`(?<=[a-zA-Z][^${NON_ENGLISH_CHARS}]+)[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}]|[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}](?=[^${NON_ENGLISH_CHARS}]+[a-zA-Z])`, 'u');
-const NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#[【★]+|[ \\-:/\\\\[|{(#$&^]+$`, 'u');
-const REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#]+|]$`, 'u');
-const REDUNDANT_SYMBOLS_AT_END = new RegExp(`[ \\-:./\\\\]+$`, 'u');
-const EMPTY_BRACKETS_REGEX = new RegExp(`\\(\\s*\\)|\\[\\s*\\]|\\{\\s*\\}`, 'u');
+  );
+  
+  const CURLY_BRACKETS = ["{", "}"];
+  const SQUARE_BRACKETS = ["[", "]"];
+  const PARENTHESES = ["(", ")"];
+  const BRACKETS = [CURLY_BRACKETS, SQUARE_BRACKETS, PARENTHESES];
+  
+  const RUSSIAN_CAST_REGEX = new RegExp("\\([^)]*[\\u0400-\\u04ff][^)]*\\)$|(?<=\\/.*)\\(.*\\)$", "u");
+  const ALT_TITLES_REGEX = new RegExp(`[^/|(]*[${NON_ENGLISH_CHARS}][^/|]*[/|]|[/|][^/|(]*[${NON_ENGLISH_CHARS}][^/|]*`, "u");
+  const NOT_ONLY_NON_ENGLISH_REGEX = new RegExp(`(?<=[a-zA-Z][^${NON_ENGLISH_CHARS}]+)[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}]|[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}](?=[^${NON_ENGLISH_CHARS}]+[a-zA-Z])`, "u");
+  const NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#[\\u3010\\u2605]+|[ \\-:/\\\\\\[|\\{(#$&^]+$`, "u");
+  const REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#]+|\\]$`, "u");
+  const REDUNDANT_SYMBOLS_AT_END = new RegExp(`[ \\-:./\\\\]+$`, "u");
+  const EMPTY_BRACKETS_REGEX = new RegExp("\\(\\s*\\)|\\[\\s*\\]|\\{\\s*\\}", "u");
 
 
 function extendOptions(options) {
