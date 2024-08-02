@@ -381,6 +381,13 @@ exports.addDefaults = /** @type Parser */ parser => {
         }
         return { matchIndex: 0 };
     });
+    
+    // shows the first language that shows up
+    parser.addHandler("language", ({ result }) => {
+        if (result.languages) {
+            result.language = result.languages[0];
+        }
+    });
 
     // Dubbed
     parser.addHandler("dubbed", /\b(?:DUBBED|dublado|dubbing|DUBS?)\b/i, boolean);
