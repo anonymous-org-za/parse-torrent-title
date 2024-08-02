@@ -66,9 +66,9 @@ exports.addDefaults = /** @type Parser */ parser => {
 
     // Source
     parser.addHandler("source", /\b(?:H[DQ][ .-]*)?CAM(?:H[DQ])?(?:[ .-]*Rip)?\b/i, value("CAM"), { remove: true });
-    parser.addHandler("source", /\b(?:H[DQ][ .-]*)?S[ .-]+print/i, value("CAM"), { remove: true });
+    parser.addHandler("source", /\b(?:H[DQ][ .-]*)?S[ .\-]print/i, value("CAM"), { remove: true });
     parser.addHandler("source", /\b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b/i, value("TeleSync"), { remove: true });
-    parser.addHandler("source", /\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b/, value("TeleCine"), { remove: true });
+    parser.addHandler("source", /\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b/i, value("TeleCine"), { remove: true });
     parser.addHandler("source", /\bBlu[ .-]*Ray\b(?=.*remux)/i, value("BluRay REMUX"), { remove: true });
     parser.addHandler("source", /(?:BD|BR|UHD)[- ]?remux/i, value("BluRay REMUX"), { remove: true });
     parser.addHandler("source", /(?<=remux.*)\bBlu[ .-]*Ray\b/i, value("BluRay REMUX"), { remove: true });
@@ -90,10 +90,11 @@ exports.addDefaults = /** @type Parser */ parser => {
     parser.addHandler("source", /\bSAT[ .-]*Rips?\b/i, value("SATRip"), { remove: true });
     parser.addHandler("source", /\bTVRips?\b/i, value("TVRip"), { remove: true });
     parser.addHandler("source", /\bR5\b/i, value("R5"), { remove: true });
-    parser.addHandler("source", /\bWEB[ .-]*DL(?:Rip)?\b/i, value("WEB-DL"), { remove: true });
+    parser.addHandler("source", /\b(WEB[ .-]?DL[ .-]?Rip)\b/i, value("WEB-DLRip"), { remove: true });
     parser.addHandler("source", /\bWEB[ .-]*Rip\b/i, value("WEBRip"), { remove: true });
-    parser.addHandler("source", /\b(?:DL|WEB|BD|BR)MUX\b/i, { remove: true });
-    parser.addHandler("source", /\b(DivX|XviD)\b/, { remove: true });
+    parser.addHandler("source", /\bWEB[ .-]*DL\b/i, value("WEB-DL"), { remove: true });
+    parser.addHandler("source", /\bWEB(?!([ .\-(),]+\d|.BDrip|.DLRIP|DL|\d+|.Web))\b/i, value("WEB-DL"), { remove: true });
+    parser.addHandler("source", /\b(?:DL|WEB|BD|BR)MUX\b/i, value("$1"), { remove: true });
 
     // Video depth
     parser.addHandler("bitDepth", /(?:8|10|12)[- ]?bit/i, lowercase, { remove: true });
