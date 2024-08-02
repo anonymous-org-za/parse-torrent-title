@@ -1,12 +1,32 @@
 const { none } = require("./transformers");
 
-// chinese/japanese/russian chars https://stackoverflow.com/a/43419070
-const NON_ENGLISH_CHARS = "\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u0400-\u04ff";
-const RUSSIAN_CAST_REGEX = new RegExp("\\([^)]*[\u0400-\u04ff][^)]*\\)$|(?<=\\/.*)\\(.*\\)$");
-const ALT_TITLES_REGEX = new RegExp(`[^/|(]*[${NON_ENGLISH_CHARS}][^/|]*[/|]|[/|][^/|(]*[${NON_ENGLISH_CHARS}][^/|]*`, "g");
-const NOT_ONLY_NON_ENGLISH_REGEX = new RegExp(`(?<=[a-zA-Z][^${NON_ENGLISH_CHARS}]+)[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}]|[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}](?=[^${NON_ENGLISH_CHARS}]+[a-zA-Z])`, "g");
-const NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#[【★]+|[ \\-:/\\\\[|{(#$&^]+$`, "g");
-const REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#]+|]$`, "g");
+const NON_ENGLISH_CHARS = (
+    "\u3040-\u30ff" + // Japanese characters
+    "\u3400-\u4dbf" + // Chinese characters
+    "\u4e00-\u9fff" + // Chinese characters
+    "\uf900-\ufaff" + // CJK Compatibility Ideographs
+    "\uff66-\uff9f" + // Halfwidth Katakana Japanese characters
+    "\u0400-\u04ff" + // Cyrillic characters (Russian)
+    "\u0600-\u06ff" + // Arabic characters
+    "\u0750-\u077f" + // Arabic characters
+    "\u0c80-\u0cff" + // Kannada characters
+    "\u0d00-\u0d7f" + // Malayalam characters
+    "\u0e00-\u0e7f"   // Thai characters
+);
+
+const CURLY_BRACKETS = ["{", "}"];
+const SQUARE_BRACKETS = ["[", "]"];
+const PARENTHESES = ["(", ")"];
+const BRACKETS = [CURLY_BRACKETS, SQUARE_BRACKETS, PARENTHESES];
+
+const RUSSIAN_CAST_REGEX = new RegExp(`\\([^)]*[\\u0400-\\u04ff][^)]*\\)$|(?<=\\/.*)\\(.*\\)$`, 'u');
+const ALT_TITLES_REGEX = new RegExp(`[^/|(]*[${NON_ENGLISH_CHARS}][^/|]*[/|]|[/|][^/|(]*[${NON_ENGLISH_CHARS}][^/|]*`, 'u');
+const NOT_ONLY_NON_ENGLISH_REGEX = new RegExp(`(?<=[a-zA-Z][^${NON_ENGLISH_CHARS}]+)[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}]|[${NON_ENGLISH_CHARS}].*[${NON_ENGLISH_CHARS}](?=[^${NON_ENGLISH_CHARS}]+[a-zA-Z])`, 'u');
+const NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#[【★]+|[ \\-:/\\\\[|{(#$&^]+$`, 'u');
+const REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END = new RegExp(`^[^\\w${NON_ENGLISH_CHARS}#]+|]$`, 'u');
+const REDUNDANT_SYMBOLS_AT_END = new RegExp(`[ \\-:./\\\\]+$`, 'u');
+const EMPTY_BRACKETS_REGEX = new RegExp(`\\(\\s*\\)|\\[\\s*\\]|\\{\\s*\\}`, 'u');
+
 
 function extendOptions(options) {
     options = options || {};
@@ -72,26 +92,45 @@ function createHandlerFromRegExp(name, regExp, transformer, options) {
 }
 
 function cleanTitle(rawTitle) {
+    /**
+     * Clean up a title string by removing unwanted characters and patterns.
+     *
+     * @param {string} rawTitle - The raw title string.
+     * @return {string} - The cleaned title string.
+     */
     let cleanedTitle = rawTitle;
 
-    if (cleanedTitle.indexOf(" ") === -1 && cleanedTitle.indexOf(".") !== -1) {
+    if (!cleanedTitle.includes(" ") && cleanedTitle.includes(".")) {
         cleanedTitle = cleanedTitle.replace(/\./g, " ");
     }
 
-    cleanedTitle = cleanedTitle
-        .replace(/_/g, " ")
-        .replace(/[[(]movie[)\]]/i, "") // clear movie indication flag
-        .replace(NOT_ALLOWED_SYMBOLS_AT_START_AND_END, "")
-        .replace(RUSSIAN_CAST_REGEX, "") // clear russian cast information
-        .replace(/^[[【★].*[\]】★][ .]?(.+)/, "$1") // remove release group markings sections from the start
-        .replace(/(.+)[ .]?[[【★].*[\]】★]$/, "$1") // remove unneeded markings section at the end if present
-        .replace(ALT_TITLES_REGEX, "") // remove alt language titles
-        .replace(NOT_ONLY_NON_ENGLISH_REGEX, "") // remove non english chars if they are not the only ones left
-        .replace(REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END, "")
-        .trim();
+    cleanedTitle = cleanedTitle.replace(/_/g, " ");
+    cleanedTitle = cleanedTitle.replace(/\[\(movie\)\]/gi, "");
+    cleanedTitle = cleanedTitle.replace(NOT_ALLOWED_SYMBOLS_AT_START_AND_END, "");
+    cleanedTitle = cleanedTitle.replace(RUSSIAN_CAST_REGEX, "");
+    cleanedTitle = cleanedTitle.replace(/^\[[【★].*[\]】★][ .]?(.+)/, "$1");
+    cleanedTitle = cleanedTitle.replace(/(.+)[ .]?[[【★].*[\]】★]$/, "$1");
+    cleanedTitle = cleanedTitle.replace(ALT_TITLES_REGEX, "");
+    cleanedTitle = cleanedTitle.replace(NOT_ONLY_NON_ENGLISH_REGEX, "");
+    cleanedTitle = cleanedTitle.replace(REMAINING_NOT_ALLOWED_SYMBOLS_AT_START_AND_END, "");
+    cleanedTitle = cleanedTitle.replace(EMPTY_BRACKETS_REGEX, "");
 
+    // Remove brackets if only one is present
+    for (let [openBracket, closeBracket] of BRACKETS) {
+        if ((cleanedTitle.match(new RegExp(`\\${openBracket}`, "g")) || []).length !== (cleanedTitle.match(new RegExp(`\\${closeBracket}`, "g")) || []).length) {
+            cleanedTitle = cleanedTitle.split(openBracket).join("").split(closeBracket).join("");
+        }
+    }
+
+    if (!cleanedTitle.includes(" ") && cleanedTitle.includes(".")) {
+        cleanedTitle = cleanedTitle.replace(/\./g, " ");
+    }
+
+    cleanedTitle = cleanedTitle.replace(REDUNDANT_SYMBOLS_AT_END, "");
+    cleanedTitle = cleanedTitle.trim();
     return cleanedTitle;
 }
+
 
 class Parser {
 
