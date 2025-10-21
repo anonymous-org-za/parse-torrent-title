@@ -223,7 +223,7 @@ exports.addDefaults = /** @type Parser */ parser => {
     parser.addHandler("episodes", /[[(]\d{1,2}\.(\d{1,3})[)\]]/, array(integer));
     parser.addHandler("episodes", /\b[Ss](?:eason\W?)?\d{1,2}[ .](\d{1,2})\b/, array(integer));
     parser.addHandler("episodes", /-\s?\d{1,2}\.(\d{2,3})\s?-/, array(integer));
-    parser.addHandler("episodes", /^\d{1,2}\.(\d{2,3}) - /, array(integer), { skipIfBefore: ["year, source", "resolution"] });
+    parser.addHandler("episodes", /^\d{1,2}\.(\d{2,3}) - /, array(integer), { skipIfBefore: ["year, source", "resolution", "audio"] });
     parser.addHandler("episodes", /(?<=\D|^)(\d{1,3})[. ]?(?:of|из|iz)[. ]?\d{1,3}(?=\D|$)/i, array(integer));
     parser.addHandler("episodes", /\b\d{2}[ ._-](\d{2})(?:.F)?\.\w{2,4}$/, array(integer));
     parser.addHandler("episodes", /(?<!^)\[(\d{2,3})](?!(?:\.\w{2,4})?$)/, array(integer));
@@ -246,7 +246,7 @@ exports.addDefaults = /** @type Parser */ parser => {
             const middleTitle = title.slice(startIndex, endIndex);
 
             // try to match the episode inside the title with a separator, if not found include the start of the title as well
-            const matches = Array.from(beginningTitle.matchAll(/(?<!movie\W*|film\W*|^)(?:[ .]+-[ .]+|[([][ .]*)(\d{1,4})(?:a|b|v\d|\.\d)?(?:\W|$)(?!movie|film|\d+)/gi)).pop() ||
+            const matches = Array.from(beginningTitle.matchAll(/(?<!movie\W*|film\W*|^)(?:[ .]+-[ .]+|[([][ .]*)(?!(?:5|7)\.1\b)(\d{1,4})(?:a|b|v\d|\.\d)?(?:\W|$)(?!movie|film|\d+)/gi)).pop() ||
                 middleTitle.match(/^(?:[([-][ .]?)?(\d{1,4})(?:a|b|v\d)?(?!\Wmovie|\Wfilm|-\d)(?:\W|$)/i);
 
             if (matches) {
